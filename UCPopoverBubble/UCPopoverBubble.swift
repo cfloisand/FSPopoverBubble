@@ -1,24 +1,41 @@
+//  Copyright (c) 2018 Uppercut
 //
-//  UCPopoverBubble.swift
-//  BlockTalk
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
 //
 //  Created by Christian Floisand on 2018-02-13.
-//  Copyright © 2018 Uppercut. All rights reserved.
 //
 
 import UIKit
 
 
-enum UCPopoverArrowDirection {
+public enum UCPopoverArrowDirection {
     case none
     case up, down, left, right
 }
 
 
 //# MARK: - UCPopoverBubble
-class UCPopoverBubble: UIViewController {
-    let arrowDirection: UCPopoverArrowDirection
+open class UCPopoverBubble: UIViewController {
     
+    //# MARK: Customizable properties
+    
+    /// The color of the popover bubble and arrow (if any).
     var color: UIColor? {
         set {
             view.backgroundColor = newValue
@@ -29,6 +46,7 @@ class UCPopoverBubble: UIViewController {
         }
     }
     
+    /// The corner radius of the popover bubble.
     var cornerRadius: CGFloat {
         set {
             view.layer.cornerRadius = newValue
@@ -38,6 +56,7 @@ class UCPopoverBubble: UIViewController {
         }
     }
     
+    /// The font to use for the popover bubble's text.
     var font: UIFont {
         set {
             _textLabel.font = newValue
@@ -47,6 +66,21 @@ class UCPopoverBubble: UIViewController {
         }
     }
     
+    /// The font to use for the popover's buttons.
+    var buttonFont: UIFont? {
+        set {
+            if let buttons = _buttons {
+                for button in buttons {
+                    button.titleLabel?.font = newValue
+                }
+            }
+        }
+        get {
+            return _buttons?.first?.titleLabel?.font
+        }
+    }
+    
+    /// Text color for the popover bubble's text.
     var textColor: UIColor {
         set {
             _textLabel.textColor = newValue
@@ -56,47 +90,90 @@ class UCPopoverBubble: UIViewController {
         }
     }
     
+    /// Called when one of the popover bubble's buttons is pressed. The popover itself is passed as an argument as well as the
+    /// index of the button (starting at 0) in the order it was added.
     var buttonHandler: ((UCPopoverBubble,Int)->())?
     
+    
+    //# MARK: Private properties
+    
+    private var _arrowDirection: UCPopoverArrowDirection
+    private var _centerOffset: CGPoint!
+    private var _centerXConstraint: NSLayoutConstraint!
+    private var _centerYConstraint: NSLayoutConstraint!
+    private var _buttons: [UIButton]?
     
     weak private var _arrowLayer: CAShapeLayer?
     weak private var _textLabel: UILabel!
     
-    private var _centerOffset: CGPoint!
-    private var _centerXConstraint: NSLayoutConstraint!
-    private var _centerYConstraint: NSLayoutConstraint!
+    static private let CONTENT_INSET: CGFloat = 12.0
+    static private let MIN_EDGE_MARGIN: CGFloat = 4.0
+    static private let ANIMATION_START_SCALE: CGFloat = 0.7
+    static private let ANIMATION_END_SCALE: CGFloat = 0.7
+    static private let ANIMATION_START_ALPHA: CGFloat = 0.1
+    static private let ANIMATION_PRESENTATION_DURATION: TimeInterval = 0.3
+    static private let ANIMATION_DISMISSAL_DURATION: TimeInterval = 0.26
     
-    static private var CONTENT_INSET: CGFloat = 12.0
-    static private var MIN_EDGE_MARGIN: CGFloat = 4.0
-    static private var ANIMATION_START_SCALE: CGFloat = 0.7
-    static private var ANIMATION_END_SCALE: CGFloat = 0.7
-    static private var ANIMATION_START_ALPHA: CGFloat = 0.1
-    
-    static private var DEFAULT_COLOR = UIColor.black.withAlphaComponent(0.62)
-    static private var DEFAULT_CORNER_RADIUS: CGFloat = 12.0
-    static private var DEFAULT_SHADOW_OPACITY: Float = 0.7
-    static private var DEFAULT_SHADOW_OFFSET = CGSize(width: 0.0, height: 2.0)
-    static private var DEFAULT_TEXT_COLOR = UIColor.white
-    static private var DEFAULT_BUTTON_COLOR = UIColor(red: 70.0/255.0, green: 128.0/255.0, blue: 196.0/255.0, alpha: 1.0)
+    static private let DEFAULT_COLOR = UIColor.black.withAlphaComponent(0.62)
+    static private let DEFAULT_CORNER_RADIUS: CGFloat = 12.0
+    static private let DEFAULT_SHADOW_OPACITY: Float = 0.7
+    static private let DEFAULT_SHADOW_OFFSET = CGSize(width: 0.0, height: 2.0)
+    static fileprivate let DEFAULT_TEXT_COLOR = UIColor.white
+    static fileprivate let DEFAULT_BUTTON_COLOR = UIColor(red: 70.0/255.0, green: 128.0/255.0, blue: 196.0/255.0, alpha: 1.0)
     
     
-    init(withArrowDirection arrowDirection: UCPopoverArrowDirection) {
-        self.arrowDirection = arrowDirection
+    //# MARK: Initialization
+    
+    /// Initializes a popover with the given text, array of buttons (if any), and arrow direction (default is none). If more than one button
+    /// is added, they are stacked vertically. If any buttons contain constraints (i.e. width & height), they are centered in the popover,
+    /// otherwise the button's leading and trailing edges are matched to the popover (with an inset amount).
+    init(withText text: String, buttons: [UIButton]?, arrowDirection: UCPopoverArrowDirection = .none) {
+        _arrowDirection = arrowDirection
         super.init(nibName: nil, bundle: nil)
-    }
-    
-    convenience init(withText text: String, arrowDirection: UCPopoverArrowDirection = .none) {
-        self.init(withArrowDirection: arrowDirection)
         
         let label = UILabel.uc_defaultLabel(withText: text)
         view.addSubview(label)
+        _textLabel = label
         
         let inset = UCPopoverBubble.CONTENT_INSET
         label.leadingAnchor.constraint(equalTo: label.superview!.leadingAnchor, constant: inset).isActive = true
         label.trailingAnchor.constraint(equalTo: label.superview!.trailingAnchor, constant: -inset).isActive = true
         label.topAnchor.constraint(equalTo: label.superview!.topAnchor, constant: inset).isActive = true
-        label.bottomAnchor.constraint(equalTo: label.superview!.bottomAnchor, constant: -inset).isActive = true
-        _textLabel = label
+        
+        if buttons == nil || buttons?.count == 0 {
+            label.bottomAnchor.constraint(equalTo: label.superview!.bottomAnchor, constant: -inset).isActive = true
+        } else {
+            _buttons = []
+            
+            var lastButton: UIButton?
+            var buttonTag = 0
+            for button in buttons! {
+                button.translatesAutoresizingMaskIntoConstraints = false
+                button.tag = buttonTag
+                button.addTarget(self, action: #selector(__buttonPressed(_:)), for: .touchUpInside)
+                
+                view.addSubview(button)
+                
+                if button.constraints.count == 0 {
+                    button.leadingAnchor.constraint(equalTo: button.superview!.leadingAnchor, constant: inset).isActive = true
+                    button.trailingAnchor.constraint(equalTo: button.superview!.trailingAnchor, constant: -inset).isActive = true
+                } else {
+                    button.centerXAnchor.constraint(equalTo: button.superview!.centerXAnchor).isActive = true
+                }
+                
+                if lastButton != nil {
+                    button.topAnchor.constraint(equalTo: lastButton!.bottomAnchor, constant: 8.0).isActive = true
+                } else {
+                    button.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 20.0).isActive = true
+                }
+                
+                buttonTag += 1
+                lastButton = button
+                _buttons?.append(button)
+            }
+            
+            lastButton!.bottomAnchor.constraint(equalTo: lastButton!.superview!.bottomAnchor, constant: -inset).isActive = true
+        }
         
         if arrowDirection != .none {
             let arrowDim = CGSize(width: 16.0, height: 16.0)
@@ -130,64 +207,35 @@ class UCPopoverBubble: UIViewController {
         }
     }
     
-    convenience init(withText text: String, buttonTitles: [String]) {
+    /// Initializes a basic popover bubble with the given text and arrow direction (default is none).
+    convenience init(withText text: String, arrowDirection: UCPopoverArrowDirection = .none) {
+        self.init(withText: text, buttons: nil, arrowDirection: arrowDirection)
+    }
+    
+    /// Initializes a popover bubble with the given text, arrow direction, and default buttons with the given titles.
+    /// If more than one button is added, they are stacked vertically.
+    convenience init(withText text: String, buttonTitles: [String], arrowDirection: UCPopoverArrowDirection = .none) {
         var buttons: [UIButton] = []
         for title in buttonTitles {
             let button = UIButton.uc_defaultButton(withTitle: title)
             buttons.append(button)
         }
         
-        self.init(withText: text, buttons: buttons)
+        self.init(withText: text, buttons: buttons, arrowDirection: arrowDirection)
     }
     
+    /// Initializes a popover bubble with the given text and custom buttons. If any of the buttons contains constraints (i.e. width & height),
+    /// it is centered horizontally in the popover. Otherwise, the button's leading and trailing edges are matched to the popover (with an inset amount).
+    /// If more than one button is added, they are stacked vertically.
     convenience init(withText text: String, buttons: [UIButton]) {
-        self.init(withArrowDirection: .none)
-        
-        let label = UILabel.uc_defaultLabel(withText: text)
-        view.addSubview(label)
-        
-        let inset = UCPopoverBubble.CONTENT_INSET
-        label.leadingAnchor.constraint(equalTo: label.superview!.leadingAnchor, constant: inset).isActive = true
-        label.trailingAnchor.constraint(equalTo: label.superview!.trailingAnchor, constant: -inset).isActive = true
-        label.topAnchor.constraint(equalTo: label.superview!.topAnchor, constant: inset).isActive = true
-        _textLabel = label
-        
-        assert(buttons.count > 0, "")
-        
-        var lastButton: UIButton?
-        var buttonTag = 0
-        for button in buttons {
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.tag = buttonTag
-            button.addTarget(self, action: #selector(__buttonPressed(_:)), for: .touchUpInside)
-            
-            view.addSubview(button)
-            
-            if button.constraints.count == 0 {
-                button.leadingAnchor.constraint(equalTo: button.superview!.leadingAnchor, constant: inset).isActive = true
-                button.trailingAnchor.constraint(equalTo: button.superview!.trailingAnchor, constant: -inset).isActive = true
-            } else {
-                button.centerXAnchor.constraint(equalTo: button.superview!.centerXAnchor).isActive = true
-            }
-            
-            if lastButton != nil {
-                button.topAnchor.constraint(equalTo: lastButton!.bottomAnchor, constant: 8.0).isActive = true
-            } else {
-                button.topAnchor.constraint(equalTo: label.bottomAnchor, constant: inset).isActive = true
-            }
-            
-            buttonTag += 1
-            lastButton = button
-        }
-        
-        lastButton!.bottomAnchor.constraint(equalTo: lastButton!.superview!.bottomAnchor, constant: -inset).isActive = true
+        self.init(withText: text, buttons: buttons, arrowDirection: .none)
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func loadView() {
+    open override func loadView() {
         let v = UIView()
         v.backgroundColor = UCPopoverBubble.DEFAULT_COLOR
         v.layer.cornerRadius = UCPopoverBubble.DEFAULT_CORNER_RADIUS
@@ -196,21 +244,21 @@ class UCPopoverBubble: UIViewController {
         view = v
     }
     
-    override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
     }
     
-    override func didReceiveMemoryWarning() {
+    open override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillLayoutSubviews() {
+    open override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         
-        if arrowDirection != .none {
+        if _arrowDirection != .none {
             assert(_arrowLayer != nil, "Missing arrow layer when arrow direction is not 'none'.")
             let arrowDim = _arrowLayer!.frame.size
             
@@ -223,7 +271,7 @@ class UCPopoverBubble: UIViewController {
             let centerY = layoutSize.height/2.0 + arrowDim.height/2.0
             var frameOrigin: CGPoint!
             
-            switch arrowDirection {
+            switch _arrowDirection {
             case .up:
                 _centerOffset.y += (layoutSize.height/2.0 + arrowDim.height)
                 frameOrigin = CGPoint(x: centerX, y: 0.0)
@@ -244,7 +292,7 @@ class UCPopoverBubble: UIViewController {
             let layoutOrigin = CGPoint(x: center.x - layoutSize.width/2.0, y: center.y - layoutSize.height/2.0)
             
             let minEdgeMargin = UCPopoverBubble.MIN_EDGE_MARGIN
-            if arrowDirection == .up || arrowDirection == .down {
+            if _arrowDirection == .up || _arrowDirection == .down {
                 if layoutOrigin.x < minEdgeMargin {
                     frameOrigin.x += (layoutOrigin.x - minEdgeMargin)
                 }
@@ -255,7 +303,7 @@ class UCPopoverBubble: UIViewController {
                 }
             }
             
-            if arrowDirection == .left || arrowDirection == .right {
+            if _arrowDirection == .left || _arrowDirection == .right {
                 if layoutOrigin.y < minEdgeMargin {
                     frameOrigin.y += (layoutOrigin.y - minEdgeMargin)
                 }
@@ -281,26 +329,32 @@ class UCPopoverBubble: UIViewController {
     
     //# MARK: Public interface
     
-    func present(animated: Bool) {
+    /// Presents the popover bubble at the center of the currently visible view controller with optional animation.
+    open func present(animated: Bool) {
         if let visibleVC = UCGetVisibleViewController() {
             present(inViewController: visibleVC, animated: animated)
         }
     }
     
-    func present(inViewController viewController: UIViewController, animated: Bool) {
+    /// Presents the popover bubble at the center of the given view controller with optional animation.
+    open func present(inViewController viewController: UIViewController, animated: Bool) {
         let parentView = viewController.view!
         let at = parentView.center
         
         present(inViewController: viewController, at: at, animated: animated)
     }
     
-    func present(at: CGPoint, animted: Bool) {
+    /// Presents the popover bubble at the given coordinate point with optional animation. The point should be in the coordinate
+    /// space of the popover's superview (i.e. the view of view controller it is being presented in).
+    open func present(at: CGPoint, animted: Bool) {
         if let visibleVC = UCGetVisibleViewController() {
             present(inViewController: visibleVC, at: at, animated: animted)
         }
     }
     
-    func present(inViewController viewController: UIViewController, at: CGPoint, animated: Bool) {
+    /// Presents the popover bubble in the given view controller at the given point with optional animation. The point should be in
+    /// the coordinate space of viewController's view.
+    open func present(inViewController viewController: UIViewController, at: CGPoint, animated: Bool) {
         viewController.addChildViewController(self)
         let parentView = viewController.view!
         
@@ -330,7 +384,8 @@ class UCPopoverBubble: UIViewController {
             view.alpha = startAlpha
             view.transform = CGAffineTransform(scaleX: startScale, y: startScale)
             
-            UIView.uc_animate(withDuration: 0.3, timingFunc: UCEasing.easeOutBack, animations: {
+            let duration = UCPopoverBubble.ANIMATION_PRESENTATION_DURATION
+            UIView.uc_animate(withDuration: duration, timingFunc: UCEasing.easeOutBack, animations: {
                 self.view.uc_transform = CGAffineTransform.identity
                 self.view.uc_alpha = 1.0
             }, completion: {
@@ -341,12 +396,14 @@ class UCPopoverBubble: UIViewController {
         }
     }
     
-    override func dismiss(animated: Bool, completion: (() -> Void)? = nil) {
+    /// Dismisses the popover bubble with optional animation, executing the completion block after it's dismissed.
+    open override func dismiss(animated: Bool, completion: (() -> Void)? = nil) {
         self.willMove(toParentViewController: nil)
         
         if animated {
+            let duration = UCPopoverBubble.ANIMATION_DISMISSAL_DURATION
             let endScale = UCPopoverBubble.ANIMATION_END_SCALE
-            UIView.uc_animate(withDuration: 0.26, timingFunc: UCEasing.easeOutQuad, animations: {
+            UIView.uc_animate(withDuration: duration, timingFunc: UCEasing.easeOutQuad, animations: {
                 self.view.uc_transform = CGAffineTransform(scaleX: endScale, y: endScale)
                 self.view.uc_alpha = 0.0
             }, completion: {
@@ -391,25 +448,27 @@ fileprivate func UCGetVisibleViewController() -> UIViewController? {
 
 //# MARK: - Extensions
 
-extension UILabel {
+fileprivate extension UILabel {
     class func uc_defaultLabel(withText text: String) -> UILabel {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.text = text
-        label.textColor = UIColor.white
+        label.textColor = UCPopoverBubble.DEFAULT_TEXT_COLOR
         label.textAlignment = .center
         
         return label
     }
 }
 
-extension UIButton {
+fileprivate extension UIButton {
     class func uc_defaultButton(withTitle title: String) -> UIButton {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle(title, for: .normal)
+        button.setTitleColor(UIColor.white, for: .normal)
+        button.backgroundColor = UCPopoverBubble.DEFAULT_BUTTON_COLOR
         
         return button
     }
@@ -418,7 +477,7 @@ extension UIButton {
 
 //# MARK: - Custom UIView animation
 
-extension UIView {
+fileprivate extension UIView {
 
     var uc_alpha: CGFloat {
         set {
@@ -558,7 +617,7 @@ fileprivate func UCLerp(a: CGFloat, t: TimeInterval, b: CGFloat) -> CGFloat {
 
 //# MARK: - Easing functions
 
-class UCEasing {
+fileprivate class UCEasing {
     
     static let easeOutBack: (CGFloat,CGFloat) -> TimeInterval = { t, d in
         let s = 1.70158
