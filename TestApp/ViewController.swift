@@ -24,15 +24,29 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let button = UIButton()
+        var button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Basic popover", for: .normal)
         button.setTitleColor(UIColor.blue, for: .normal)
         button.addTarget(self, action: #selector(__showPopover(_:)), for: .touchUpInside)
+        button.tag = 0
         
         view.addSubview(button)
         button.centerXAnchor.constraint(equalTo: button.superview!.centerXAnchor).isActive = true
         button.topAnchor.constraint(equalTo: button.superview!.topAnchor, constant: 80.0).isActive = true
+        
+        var lastButton = button
+        
+        button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Popover with down arrow", for: .normal)
+        button.setTitleColor(UIColor.blue, for: .normal)
+        button.addTarget(self, action: #selector(__showPopover(_:)), for: .touchUpInside)
+        button.tag = 1
+        
+        view.addSubview(button)
+        button.centerXAnchor.constraint(equalTo: button.superview!.centerXAnchor).isActive = true
+        button.topAnchor.constraint(equalTo: lastButton.bottomAnchor, constant: 8.0).isActive = true
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(__dismissPopover(_:)))
         view.addGestureRecognizer(tapGesture)
@@ -44,8 +58,17 @@ class ViewController: UIViewController {
     }
     
     @objc private func __showPopover(_ sender: Any?) {
-        let popover = UCPopoverBubble(withText: "Here is some text for the popover!")
-        popover.present(animated: true)
+        let button = sender as! UIButton
+        var popover: UCPopoverBubble!
+        
+        if button.tag == 0 {
+            popover = UCPopoverBubble(withText: "Here is some text for the popover!")
+            popover.present(animated: true)
+        } else if button.tag == 1 {
+            popover = UCPopoverBubble(withText: "Look here!", arrowDirection: .down)
+            popover.present(at: CGPoint(x: 40.0, y: view.frame.height - 60.0), animted: true)
+        }
+        
         _visiblePopover = popover
     }
 

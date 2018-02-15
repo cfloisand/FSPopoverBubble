@@ -58,6 +58,7 @@ class UCPopoverBubble: UIViewController {
     
     var buttonHandler: ((UCPopoverBubble,Int)->())?
     
+    
     weak private var _arrowLayer: CAShapeLayer?
     weak private var _textLabel: UILabel!
     
@@ -65,6 +66,7 @@ class UCPopoverBubble: UIViewController {
     private var _centerXConstraint: NSLayoutConstraint!
     private var _centerYConstraint: NSLayoutConstraint!
     
+    static private var CONTENT_INSET: CGFloat = 12.0
     static private var MIN_EDGE_MARGIN: CGFloat = 4.0
     static private var ANIMATION_START_SCALE: CGFloat = 0.7
     static private var ANIMATION_END_SCALE: CGFloat = 0.7
@@ -88,15 +90,16 @@ class UCPopoverBubble: UIViewController {
         
         let label = UILabel.uc_defaultLabel(withText: text)
         view.addSubview(label)
-        label.leadingAnchor.constraint(equalTo: label.superview!.leadingAnchor, constant: 12.0).isActive = true
-        label.trailingAnchor.constraint(equalTo: label.superview!.trailingAnchor, constant: -12.0).isActive = true
-        label.topAnchor.constraint(equalTo: label.superview!.topAnchor, constant: 12.0).isActive = true
-        label.bottomAnchor.constraint(equalTo: label.superview!.bottomAnchor, constant: -12.0).isActive = true
+        
+        let inset = UCPopoverBubble.CONTENT_INSET
+        label.leadingAnchor.constraint(equalTo: label.superview!.leadingAnchor, constant: inset).isActive = true
+        label.trailingAnchor.constraint(equalTo: label.superview!.trailingAnchor, constant: -inset).isActive = true
+        label.topAnchor.constraint(equalTo: label.superview!.topAnchor, constant: inset).isActive = true
+        label.bottomAnchor.constraint(equalTo: label.superview!.bottomAnchor, constant: -inset).isActive = true
         _textLabel = label
         
         if arrowDirection != .none {
             let arrowDim = CGSize(width: 16.0, height: 16.0)
-            
             let arrowPath = CGMutablePath()
             
             switch arrowDirection {
@@ -118,7 +121,7 @@ class UCPopoverBubble: UIViewController {
             arrowPath.closeSubpath()
             
             let arrowLayer = CAShapeLayer()
-            arrowLayer.fillColor = UIColor.black.withAlphaComponent(0.72).cgColor
+            arrowLayer.fillColor = UCPopoverBubble.DEFAULT_COLOR.cgColor
             arrowLayer.frame = CGRect(x: 0.0, y: 0.0, width: arrowDim.width, height: arrowDim.height)
             arrowLayer.path = arrowPath
             
@@ -142,9 +145,11 @@ class UCPopoverBubble: UIViewController {
         
         let label = UILabel.uc_defaultLabel(withText: text)
         view.addSubview(label)
-        label.leadingAnchor.constraint(equalTo: label.superview!.leadingAnchor, constant: 20.0).isActive = true
-        label.trailingAnchor.constraint(equalTo: label.superview!.trailingAnchor, constant: -20.0).isActive = true
-        label.topAnchor.constraint(equalTo: label.superview!.topAnchor, constant: 20.0).isActive = true
+        
+        let inset = UCPopoverBubble.CONTENT_INSET
+        label.leadingAnchor.constraint(equalTo: label.superview!.leadingAnchor, constant: inset).isActive = true
+        label.trailingAnchor.constraint(equalTo: label.superview!.trailingAnchor, constant: -inset).isActive = true
+        label.topAnchor.constraint(equalTo: label.superview!.topAnchor, constant: inset).isActive = true
         _textLabel = label
         
         assert(buttons.count > 0, "")
@@ -159,8 +164,8 @@ class UCPopoverBubble: UIViewController {
             view.addSubview(button)
             
             if button.constraints.count == 0 {
-                button.leadingAnchor.constraint(equalTo: button.superview!.leadingAnchor, constant: 20.0).isActive = true
-                button.trailingAnchor.constraint(equalTo: button.superview!.trailingAnchor, constant: -20.0).isActive = true
+                button.leadingAnchor.constraint(equalTo: button.superview!.leadingAnchor, constant: inset).isActive = true
+                button.trailingAnchor.constraint(equalTo: button.superview!.trailingAnchor, constant: -inset).isActive = true
             } else {
                 button.centerXAnchor.constraint(equalTo: button.superview!.centerXAnchor).isActive = true
             }
@@ -168,14 +173,14 @@ class UCPopoverBubble: UIViewController {
             if lastButton != nil {
                 button.topAnchor.constraint(equalTo: lastButton!.bottomAnchor, constant: 8.0).isActive = true
             } else {
-                button.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 20.0).isActive = true
+                button.topAnchor.constraint(equalTo: label.bottomAnchor, constant: inset).isActive = true
             }
             
             buttonTag += 1
             lastButton = button
         }
         
-        lastButton!.bottomAnchor.constraint(equalTo: lastButton!.superview!.bottomAnchor, constant: -20.0).isActive = true
+        lastButton!.bottomAnchor.constraint(equalTo: lastButton!.superview!.bottomAnchor, constant: -inset).isActive = true
     }
     
     required init?(coder aDecoder: NSCoder) {
