@@ -376,9 +376,9 @@ open class UCPopoverBubble: UIViewController {
     
     /// Presents the popover bubble at the given coordinate point with optional animation. The point should be in the coordinate
     /// space of the popover's superview (i.e. the view of view controller it is being presented in).
-    open func present(at: CGPoint, animted: Bool) {
+    open func present(at: CGPoint, animated: Bool) {
         if let visibleVC = UCGetVisibleViewController() {
-            present(inViewController: visibleVC, at: at, animated: animted)
+            present(inViewController: visibleVC, at: at, animated: animated)
         }
     }
     

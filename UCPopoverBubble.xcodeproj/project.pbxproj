@@ -23,6 +23,8 @@
 		465D444E20339A4400C98712 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		465D445020339A4400C98712 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		465D445720339B7A00C98712 /* UCPopoverBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UCPopoverBubble.swift; sourceTree = "<group>"; };
+		466F54A1203CA31F00A04CA9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		466F54A2203CA34200A04CA9 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		46794A612036457800EB6711 /* CustomPopovers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPopovers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -40,6 +42,8 @@
 		465D443820339A4400C98712 = {
 			isa = PBXGroup;
 			children = (
+				466F54A2203CA34200A04CA9 /* LICENSE.txt */,
+				466F54A1203CA31F00A04CA9 /* README.md */,
 				466BDDD82034BE1900D29B4B /* UCPopoverBubble */,
 				465D444320339A4400C98712 /* Examples */,
 				465D444220339A4400C98712 /* Products */,
