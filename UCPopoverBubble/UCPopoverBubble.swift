@@ -57,26 +57,12 @@ open class UCPopoverBubble: UIViewController {
     }
     
     /// The font to use for the popover bubble's text.
-    var font: UIFont {
+    var textFont: UIFont? {
         set {
             _textLabel.font = newValue
         }
         get {
             return _textLabel.font
-        }
-    }
-    
-    /// The font to use for the popover's buttons.
-    var buttonFont: UIFont? {
-        set {
-            if let buttons = _buttons {
-                for button in buttons {
-                    button.titleLabel?.font = newValue
-                }
-            }
-        }
-        get {
-            return _buttons?.first?.titleLabel?.font
         }
     }
     
@@ -90,9 +76,42 @@ open class UCPopoverBubble: UIViewController {
         }
     }
     
+    /// The font to use for the popover's buttons.
+    /// - Note: Don't use this property for custom buttons.
+    var buttonFont: UIFont? {
+        set {
+            if let buttons = _buttons {
+                for button in buttons {
+                    button.titleLabel?.font = newValue
+                }
+            }
+        }
+        get {
+            return _buttons?.first?.titleLabel?.font
+        }
+    }
+    
+    /// The background color to use for default buttons.
+    /// - Note: Don't use this property for custom buttons.
+    var buttonColor: UIColor? {
+        set {
+            if let buttons = _buttons {
+                for button in buttons {
+                    button.backgroundColor = newValue
+                }
+            }
+        }
+        get {
+            return _buttons?.first?.backgroundColor
+        }
+    }
+    
     /// Called when one of the popover bubble's buttons is pressed. The popover itself is passed as an argument as well as the
     /// index of the button (starting at 0) in the order it was added.
     var buttonHandler: ((UCPopoverBubble,Int)->())?
+    
+    /// Controls whether the popover automatically dismisses itself when tapped.
+    var dismissesOnTap: Bool = true
     
     
     //# MARK: Private properties
@@ -321,6 +340,17 @@ open class UCPopoverBubble: UIViewController {
         _centerYConstraint.constant = _centerOffset.y
     }
     
+    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first, self.dismissesOnTap {
+            let touchPoint = touch.location(in: view)
+            if view.point(inside: touchPoint, with: event) {
+                dismiss(animated: true)
+            }
+        }
+        
+        super.touchesEnded(touches, with: event)
+    }
+    
     @objc private func __buttonPressed(_ sender: Any?) {
         let button = sender as! UIButton
         buttonHandler?(self, button.tag)
@@ -367,14 +397,43 @@ open class UCPopoverBubble: UIViewController {
         _centerXConstraint.isActive = true
         _centerYConstraint.isActive = true
         
+        var minEdgeMargins = UIEdgeInsets(top: UCPopoverBubble.MIN_EDGE_MARGIN, left: UCPopoverBubble.MIN_EDGE_MARGIN, bottom: UCPopoverBubble.MIN_EDGE_MARGIN, right: UCPopoverBubble.MIN_EDGE_MARGIN)
+        switch _arrowDirection {
+        case .left:
+            if at.x > minEdgeMargins.left {
+                minEdgeMargins.left = at.x + _arrowLayer!.frame.width
+            } else {
+                minEdgeMargins.left += _arrowLayer!.frame.width
+            }
+        case .right:
+            if at.x < minEdgeMargins.right {
+                minEdgeMargins.right = (parentView.frame.width - at.x) + _arrowLayer!.frame.width
+            } else {
+                minEdgeMargins.right += _arrowLayer!.frame.width
+            }
+        case .up:
+            if at.y > minEdgeMargins.top {
+                minEdgeMargins.top = at.y + _arrowLayer!.frame.height
+            } else {
+                minEdgeMargins.top += _arrowLayer!.frame.height
+            }
+        case .down:
+            if at.y < minEdgeMargins.bottom {
+                minEdgeMargins.bottom = (parentView.frame.height - at.y) + _arrowLayer!.frame.height
+            } else {
+                minEdgeMargins.bottom += _arrowLayer!.frame.height
+            }
+        default:
+            break
+        }
+        
         // NOTE(christian): These constraints prevent the popover from clipping its superview due to its size and position.
         // These constraints have a higher priority than the center positioning constraints, which will cause them to break if
         // these can't be satisfied.
-        let minEdgeMargin = UCPopoverBubble.MIN_EDGE_MARGIN
-        view.leadingAnchor.constraint(greaterThanOrEqualTo: view.superview!.leadingAnchor, constant: minEdgeMargin).isActive = true
-        view.trailingAnchor.constraint(lessThanOrEqualTo: view.superview!.trailingAnchor, constant: -minEdgeMargin).isActive = true
-        view.topAnchor.constraint(greaterThanOrEqualTo: view.superview!.topAnchor, constant: minEdgeMargin).isActive = true
-        view.bottomAnchor.constraint(lessThanOrEqualTo: view.superview!.bottomAnchor, constant: -minEdgeMargin).isActive = true
+        view.leadingAnchor.constraint(greaterThanOrEqualTo: view.superview!.leadingAnchor, constant: minEdgeMargins.left).isActive = true
+        view.trailingAnchor.constraint(lessThanOrEqualTo: view.superview!.trailingAnchor, constant: -minEdgeMargins.right).isActive = true
+        view.topAnchor.constraint(greaterThanOrEqualTo: view.superview!.topAnchor, constant: minEdgeMargins.top).isActive = true
+        view.bottomAnchor.constraint(lessThanOrEqualTo: view.superview!.bottomAnchor, constant: -minEdgeMargins.bottom).isActive = true
         
         _centerOffset = CGPoint(x: at.x - parentView.center.x, y: at.y - parentView.center.y)
         
@@ -620,7 +679,7 @@ fileprivate func UCLerp(a: CGFloat, t: TimeInterval, b: CGFloat) -> CGFloat {
 fileprivate class UCEasing {
     
     static let easeOutBack: (CGFloat,CGFloat) -> TimeInterval = { t, d in
-        let s = 1.70158
+        let s = 1.90158
         var t = TimeInterval(t)
         t = t/TimeInterval(d) - 1.0
         return (t * t * ((s + 1.0) * t + s) + 1.0)

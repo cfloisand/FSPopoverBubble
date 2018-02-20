@@ -28,13 +28,17 @@ class UCOkPopover: UCPopoverBubble {
     init(withText text: String) {
         let okButton = UIButton()
         okButton.setTitle("OK", for: .normal)
+        okButton.titleLabel?.font = UIFont(name: "HelveticaNeue-Bold", size: 22.0)
         okButton.backgroundColor = UIColor(red: 9.0/255.0, green: 106.0/255.0, blue: 137.0/255.0, alpha: 1.0)
+        okButton.widthAnchor.constraint(equalToConstant: 68.0).isActive = true
+        okButton.heightAnchor.constraint(equalToConstant: 42.0).isActive = true
+        okButton.layer.cornerRadius = 4.0
         
         super.init(withText: text, buttons: [okButton], arrowDirection: .none)
         
-        font = UIFont(name: "HelveticaNeue", size: 24.0)!
-        buttonFont = UIFont(name: "HelveticaNeue-Bold", size: 22.0)
         color = UIColor(red: 14.0/255.0, green: 42.0/255.0, blue: 71.0/255.0, alpha: 0.81)
+        textFont = UIFont(name: "HelveticaNeue", size: 24.0)!
+        dismissesOnTap = false
     }
     
     public required init?(coder aDecoder: NSCoder) {
@@ -46,7 +50,7 @@ extension UCPopoverBubble {
     class func uc_miniPopover(withText text: String, arrowDirection: UCPopoverArrowDirection) -> UCPopoverBubble {
         let popover = UCPopoverBubble(withText: text, arrowDirection: arrowDirection)
         popover.color = UIColor(red: 114.0/255.0, green: 107.0/255.0, blue: 53.0/255.0, alpha: 0.7)
-        popover.font = UIFont(name: "HelveticaNeue-Thin", size: 16.0)!
+        popover.textFont = UIFont(name: "HelveticaNeue-Thin", size: 16.0)!
         popover.textColor = UIColor.black
         
         return popover

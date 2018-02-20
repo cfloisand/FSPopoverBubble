@@ -25,7 +25,6 @@ import UIKit
 
 
 class ViewController: UIViewController {
-    private var _visiblePopovers: [UCPopoverBubble] = []
     
     
     override func loadView() {
@@ -104,8 +103,18 @@ class ViewController: UIViewController {
         
         lastButton = button
         
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(__dismissPopovers(_:)))
-        view.addGestureRecognizer(tapGesture)
+        button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("A larger popover", for: .normal)
+        button.setTitleColor(UIColor.blue, for: .normal)
+        button.addTarget(self, action: #selector(__showPopover(_:)), for: .touchUpInside)
+        button.tag = 5
+        
+        view.addSubview(button)
+        button.centerXAnchor.constraint(equalTo: button.superview!.centerXAnchor).isActive = true
+        button.topAnchor.constraint(equalTo: lastButton.bottomAnchor, constant: 8.0).isActive = true
+        
+        lastButton = button
     }
 
     override func didReceiveMemoryWarning() {
@@ -118,13 +127,13 @@ class ViewController: UIViewController {
         var popover: UCPopoverBubble!
         
         if button.tag == 0 {
-            popover = UCPopoverBubble(withText: "Here is some text for the popover!")
+            popover = UCPopoverBubble(withText: "Basic popover. Here is some text!")
             popover.present(animated: true)
         } else if button.tag == 1 {
             popover = UCPopoverBubble(withText: "Look here!", arrowDirection: .down)
             popover.present(at: CGPoint(x: 40.0, y: view.frame.height - 60.0), animted: true)
         } else if button.tag == 2 {
-            popover = UCOkPopover(withText: "This is a popover with an OK button.\nTry pressing it!")
+            popover = UCOkPopover(withText: "This is a popover with a custom OK button.\nTry pressing it!")
             popover.buttonHandler = { po, index in
                 print("Pressed OK")
                 po.dismiss(animated: true)
@@ -135,23 +144,22 @@ class ViewController: UIViewController {
             popover.present(at: CGPoint(x: view.frame.width - 20.0, y: view.center.y), animted: true)
         } else if button.tag == 4 {
             popover = UCPopoverBubble(withText: "There are two buttons on this popover for you to press.\nTry it now!", buttonTitles: ["Button one", "Button two"], arrowDirection: .up)
-            popover.font = UIFont(name: "HelveticaNeue-Bold", size: 22.0)!
+            popover.textFont = UIFont(name: "HelveticaNeue-Bold", size: 22.0)
             popover.buttonFont = UIFont(name: "HelveticaNeue", size: 20.0)
             popover.buttonHandler = { po, index in
                 print("Pressed button \(index)")
                 po.dismiss(animated: true)
             }
+            popover.dismissesOnTap = false
             popover.present(at: CGPoint(x: view.center.x, y: 20.0), animted: true)
+        } else if button.tag == 5 {
+            popover = UCPopoverBubble(withText: "This popover points to the left!\nIt has multiple lines to show how the popover adjusts itself to always remain within the bounds of it's containing view.", arrowDirection: .left)
+            popover.cornerRadius = 2.0
+            popover.color = UIColor(red: 218.0/255.0, green: 54.0/255.0, blue: 17.0/255.0, alpha: 1.0)
+            popover.textFont = UIFont(name: "HelveticaNeue-Thin", size: 18.0)
+            popover.textColor = UIColor.darkGray
+            popover.present(at: CGPoint(x: 12.0, y: view.frame.height - 28.0), animted: true)
         }
-        
-        _visiblePopovers.append(popover)
-    }
-
-    @objc private func __dismissPopovers(_ sender: Any?) {
-        _visiblePopovers.forEach { po in
-            po.dismiss(animated: true, completion: nil)
-        }
-        _visiblePopovers.removeAll()
     }
     
 }
