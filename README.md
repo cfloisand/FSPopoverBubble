@@ -20,7 +20,7 @@ let popover = UCPopoverBubble(withText: "Look here!", arrowDirection: .down)
 popover.present(at: CGPoint(x: 40.0, y: view.frame.height - 60.0), animated: true)
 ```
 
-When presenting a popover with an arrow, specifying a point will attempt to place the popover with the tip of the arrow at the given location. Otherwise, if the popover does not have an arrow, presenting it will attempt to place the popover with its center at the given point. Popovers will also prevent themselves from clipping in the view they are presented in.
+When presenting a popover with an arrow, specifying a point will attempt to place the popover with the tip of the arrow at the given location. Otherwise, if the popover does not have an arrow, presenting it will attempt to place the popover with its center at the given point. Popovers will  prevent themselves from clipping in the view they are presented in.
 
 For a popover with default buttons:
 ```
