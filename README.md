@@ -2,17 +2,17 @@
 
 FSPopoverBubble is a simple UI element for iOS that can display text and optional buttons. It's great for custom alerts and on-boarding, and supports customization of most of it's visual properties. Animation is handled with easing functions to give the appearance and disappearance of the popover a smooth, unique look.
 
-![](https://github.com/cfloisand/UCPopoverBubble/blob/master/Samples/popovers.gif "Popover animations")
+![](https://github.com/cfloisand/FSPopoverBubble/blob/master/Samples/popovers.gif "Popover animations")
 
-![](https://github.com/cfloisand/UCPopoverBubble/blob/master/Samples/popover1.png "Basic popover")
+![](https://github.com/cfloisand/FSPopoverBubble/blob/master/Samples/popover1.png "Basic popover")
 
-![](https://github.com/cfloisand/UCPopoverBubble/blob/master/Samples/popover2.png "Popover with arrow")
+![](https://github.com/cfloisand/FSPopoverBubble/blob/master/Samples/popover2.png "Popover with arrow")
 
-![](https://github.com/cfloisand/UCPopoverBubble/blob/master/Samples/popover3.png "Popover with OK button")
+![](https://github.com/cfloisand/FSPopoverBubble/blob/master/Samples/popover3.png "Popover with OK button")
 
-![](https://github.com/cfloisand/UCPopoverBubble/blob/master/Samples/popover4.png "Small popover with arrow")
+![](https://github.com/cfloisand/FSPopoverBubble/blob/master/Samples/popover4.png "Small popover with arrow")
 
-![](https://github.com/cfloisand/UCPopoverBubble/blob/master/Samples/popover5.png "Popover with two default buttons")
+![](https://github.com/cfloisand/FSPopoverBubble/blob/master/Samples/popover5.png "Popover with two default buttons")
 
 ## Installation
 Simply download this repository and copy _FSPopoverBubble.swift_ into your project.
