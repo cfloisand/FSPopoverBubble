@@ -1,4 +1,4 @@
-//  Copyright (c) 2018 Uppercut
+//  Copyright (c) 2018 Flyingsand
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 import UIKit
 
 
-class UCOkPopover: UCPopoverBubble {
+class FSOkPopover: FSPopoverBubble {
     init(withText text: String) {
         let okButton = UIButton()
         okButton.setTitle("OK", for: .normal)
@@ -46,9 +46,9 @@ class UCOkPopover: UCPopoverBubble {
     }
 }
 
-extension UCPopoverBubble {
-    class func uc_miniPopover(withText text: String, arrowDirection: UCPopoverArrowDirection) -> UCPopoverBubble {
-        let popover = UCPopoverBubble(withText: text, arrowDirection: arrowDirection)
+extension FSPopoverBubble {
+    class func fs_miniPopover(withText text: String, arrowDirection: FSPopoverArrowDirection) -> FSPopoverBubble {
+        let popover = FSPopoverBubble(withText: text, arrowDirection: arrowDirection)
         popover.color = UIColor(red: 114.0/255.0, green: 107.0/255.0, blue: 53.0/255.0, alpha: 0.7)
         popover.textFont = UIFont(name: "HelveticaNeue-Thin", size: 16.0)!
         popover.textColor = UIColor.black

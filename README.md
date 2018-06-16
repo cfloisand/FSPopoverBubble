@@ -1,16 +1,16 @@
-# UCPopoverBubble
+# FSPopoverBubble
 
-UCPopoverBubble is a simple UI element for iOS that can display text and optional buttons. It's great for custom alerts and on-boarding, and supports customization of most of it's visual properties. Animation is handled with easing functions to give the appearance and disappearance of the popover a smooth, unique look.
+FSPopoverBubble is a simple UI element for iOS that can display text and optional buttons. It's great for custom alerts and on-boarding, and supports customization of most of it's visual properties. Animation is handled with easing functions to give the appearance and disappearance of the popover a smooth, unique look.
 
 []()
 
 ## Installation
-Simply download this repository and copy _UCPopoverBubble.swift_ into your project.
+Simply download this repository and copy _FSPopoverBubble.swift_ into your project.
 
 ## Usage
 For a basic popover with just text and no arrow:
 ```
-let popover = UCPopoverBubble(withText: "Basic popover. Here is some text!")
+let popover = FSPopoverBubble(withText: "Basic popover. Here is some text!")
 popover.present(animated: true)
 ```
 
@@ -18,7 +18,7 @@ If `present:` is called with no view controller, it attempts to present the popo
 
 For a popover with text and an arrow:
 ```
-let popover = UCPopoverBubble(withText: "Look here!", arrowDirection: .down)
+let popover = FSPopoverBubble(withText: "Look here!", arrowDirection: .down)
 popover.present(at: CGPoint(x: 40.0, y: view.frame.height - 60.0), animated: true)
 ```
 
@@ -26,7 +26,7 @@ When presenting a popover with an arrow, specifying a point will attempt to plac
 
 For a popover with default buttons:
 ```
-let popover = UCPopoverBubble(withText: "Here are two buttons:", buttonTitles: ["Button one", "Button two"], arrowDirection: .up)
+let popover = FSPopoverBubble(withText: "Here are two buttons:", buttonTitles: ["Button one", "Button two"], arrowDirection: .up)
 popover.textFont = UIFont(name: "HelveticaNeue-Bold", size: 22.0)
 popover.buttonFont = UIFont(name: "HelveticaNeue", size: 20.0)
 popover.buttonHandler = { po, index in
@@ -43,7 +43,7 @@ For a popover with custom buttons:
 ```
 let button0: UIButton = ...
 let button1: UIButton = ...
-let popover = UCPopoverBubble(withText: "Showing some custom buttons.", buttons: [button0, button1])
+let popover = FSPopoverBubble(withText: "Showing some custom buttons.", buttons: [button0, button1])
 ...
 ```
 
@@ -58,5 +58,5 @@ Customizable properties include:
 - `dismissesOnTap` (controls whether the popover should automatically dismiss itself if tapped)
 
 ## License
-UCPopoverBubble is released under the MIT license. See [LICENSE](https://github.com/madebyuppercut/UCPopoverBubble/blob/master/LICENSE.txt) for more details.
+FSPopoverBubble is released under the MIT license. See [LICENSE](https://github.com/cfloisand/FSPopoverBubble/blob/master/LICENSE.txt) for more details.
 

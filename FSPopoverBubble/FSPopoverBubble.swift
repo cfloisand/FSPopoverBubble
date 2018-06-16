@@ -1,4 +1,4 @@
-//  Copyright (c) 2018 Uppercut
+//  Copyright (c) 2018 Flyingsand
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -24,14 +24,14 @@
 import UIKit
 
 
-public enum UCPopoverArrowDirection {
+public enum FSPopoverArrowDirection {
     case none
     case up, down, left, right
 }
 
 
-//# MARK: - UCPopoverBubble
-open class UCPopoverBubble: UIViewController {
+//# MARK: - FSPopoverBubble
+open class FSPopoverBubble: UIViewController {
     
     //# MARK: Customizable properties
     
@@ -108,7 +108,7 @@ open class UCPopoverBubble: UIViewController {
     
     /// Called when one of the popover bubble's buttons is pressed. The popover itself is passed as an argument as well as the
     /// index of the button (starting at 0) in the order it was added.
-    var buttonHandler: ((UCPopoverBubble,Int)->())?
+    var buttonHandler: ((FSPopoverBubble,Int)->())?
     
     /// Controls whether the popover automatically dismisses itself when tapped.
     var dismissesOnTap: Bool = true
@@ -116,7 +116,7 @@ open class UCPopoverBubble: UIViewController {
     
     //# MARK: Private properties
     
-    private var _arrowDirection: UCPopoverArrowDirection
+    private var _arrowDirection: FSPopoverArrowDirection
     private var _centerOffset: CGPoint!
     private var _centerXConstraint: NSLayoutConstraint!
     private var _centerYConstraint: NSLayoutConstraint!
@@ -146,15 +146,15 @@ open class UCPopoverBubble: UIViewController {
     /// Initializes a popover with the given text, array of buttons (if any), and arrow direction (default is none). If more than one button
     /// is added, they are stacked vertically. If any buttons contain constraints (i.e. width & height), they are centered in the popover,
     /// otherwise the button's leading and trailing edges are matched to the popover (with an inset amount).
-    init(withText text: String, buttons: [UIButton]?, arrowDirection: UCPopoverArrowDirection = .none) {
+    init(withText text: String, buttons: [UIButton]?, arrowDirection: FSPopoverArrowDirection = .none) {
         _arrowDirection = arrowDirection
         super.init(nibName: nil, bundle: nil)
         
-        let label = UILabel.uc_defaultLabel(withText: text)
+        let label = UILabel.fs_defaultLabel(withText: text)
         view.addSubview(label)
         _textLabel = label
         
-        let inset = UCPopoverBubble.CONTENT_INSET
+        let inset = FSPopoverBubble.CONTENT_INSET
         label.leadingAnchor.constraint(equalTo: label.superview!.leadingAnchor, constant: inset).isActive = true
         label.trailingAnchor.constraint(equalTo: label.superview!.trailingAnchor, constant: -inset).isActive = true
         label.topAnchor.constraint(equalTo: label.superview!.topAnchor, constant: inset).isActive = true
@@ -217,7 +217,7 @@ open class UCPopoverBubble: UIViewController {
             arrowPath.closeSubpath()
             
             let arrowLayer = CAShapeLayer()
-            arrowLayer.fillColor = UCPopoverBubble.DEFAULT_COLOR.cgColor
+            arrowLayer.fillColor = FSPopoverBubble.DEFAULT_COLOR.cgColor
             arrowLayer.frame = CGRect(x: 0.0, y: 0.0, width: arrowDim.width, height: arrowDim.height)
             arrowLayer.path = arrowPath
             
@@ -227,16 +227,16 @@ open class UCPopoverBubble: UIViewController {
     }
     
     /// Initializes a basic popover bubble with the given text and arrow direction (default is none).
-    convenience init(withText text: String, arrowDirection: UCPopoverArrowDirection = .none) {
+    convenience init(withText text: String, arrowDirection: FSPopoverArrowDirection = .none) {
         self.init(withText: text, buttons: nil, arrowDirection: arrowDirection)
     }
     
     /// Initializes a popover bubble with the given text, arrow direction, and default buttons with the given titles.
     /// If more than one button is added, they are stacked vertically.
-    convenience init(withText text: String, buttonTitles: [String], arrowDirection: UCPopoverArrowDirection = .none) {
+    convenience init(withText text: String, buttonTitles: [String], arrowDirection: FSPopoverArrowDirection = .none) {
         var buttons: [UIButton] = []
         for title in buttonTitles {
-            let button = UIButton.uc_defaultButton(withTitle: title)
+            let button = UIButton.fs_defaultButton(withTitle: title)
             buttons.append(button)
         }
         
@@ -256,10 +256,10 @@ open class UCPopoverBubble: UIViewController {
     
     open override func loadView() {
         let v = UIView()
-        v.backgroundColor = UCPopoverBubble.DEFAULT_COLOR
-        v.layer.cornerRadius = UCPopoverBubble.DEFAULT_CORNER_RADIUS
-        v.layer.shadowOpacity = UCPopoverBubble.DEFAULT_SHADOW_OPACITY
-        v.layer.shadowOffset = UCPopoverBubble.DEFAULT_SHADOW_OFFSET
+        v.backgroundColor = FSPopoverBubble.DEFAULT_COLOR
+        v.layer.cornerRadius = FSPopoverBubble.DEFAULT_CORNER_RADIUS
+        v.layer.shadowOpacity = FSPopoverBubble.DEFAULT_SHADOW_OPACITY
+        v.layer.shadowOffset = FSPopoverBubble.DEFAULT_SHADOW_OFFSET
         view = v
     }
     
@@ -310,7 +310,7 @@ open class UCPopoverBubble: UIViewController {
             let center = CGPoint(x: view.center.x + _centerOffset.x, y: view.center.y + _centerOffset.y)
             let layoutOrigin = CGPoint(x: center.x - layoutSize.width/2.0, y: center.y - layoutSize.height/2.0)
             
-            let minEdgeMargin = UCPopoverBubble.MIN_EDGE_MARGIN
+            let minEdgeMargin = FSPopoverBubble.MIN_EDGE_MARGIN
             if _arrowDirection == .up || _arrowDirection == .down {
                 if layoutOrigin.x < minEdgeMargin {
                     frameOrigin.x += (layoutOrigin.x - minEdgeMargin)
@@ -361,7 +361,7 @@ open class UCPopoverBubble: UIViewController {
     
     /// Presents the popover bubble at the center of the currently visible view controller with optional animation.
     open func present(animated: Bool) {
-        if let visibleVC = UCGetVisibleViewController() {
+        if let visibleVC = FSGetVisibleViewController() {
             present(inViewController: visibleVC, animated: animated)
         }
     }
@@ -377,7 +377,7 @@ open class UCPopoverBubble: UIViewController {
     /// Presents the popover bubble at the given coordinate point with optional animation. The point should be in the coordinate
     /// space of the popover's superview (i.e. the view of view controller it is being presented in).
     open func present(at: CGPoint, animated: Bool) {
-        if let visibleVC = UCGetVisibleViewController() {
+        if let visibleVC = FSGetVisibleViewController() {
             present(inViewController: visibleVC, at: at, animated: animated)
         }
     }
@@ -397,7 +397,7 @@ open class UCPopoverBubble: UIViewController {
         _centerXConstraint.isActive = true
         _centerYConstraint.isActive = true
         
-        var minEdgeMargins = UIEdgeInsets(top: UCPopoverBubble.MIN_EDGE_MARGIN, left: UCPopoverBubble.MIN_EDGE_MARGIN, bottom: UCPopoverBubble.MIN_EDGE_MARGIN, right: UCPopoverBubble.MIN_EDGE_MARGIN)
+        var minEdgeMargins = UIEdgeInsets(top: FSPopoverBubble.MIN_EDGE_MARGIN, left: FSPopoverBubble.MIN_EDGE_MARGIN, bottom: FSPopoverBubble.MIN_EDGE_MARGIN, right: FSPopoverBubble.MIN_EDGE_MARGIN)
         switch _arrowDirection {
         case .left:
             if at.x > minEdgeMargins.left {
@@ -438,15 +438,15 @@ open class UCPopoverBubble: UIViewController {
         _centerOffset = CGPoint(x: at.x - parentView.center.x, y: at.y - parentView.center.y)
         
         if animated {
-            let startAlpha = UCPopoverBubble.ANIMATION_START_ALPHA
-            let startScale = UCPopoverBubble.ANIMATION_START_SCALE
+            let startAlpha = FSPopoverBubble.ANIMATION_START_ALPHA
+            let startScale = FSPopoverBubble.ANIMATION_START_SCALE
             view.alpha = startAlpha
             view.transform = CGAffineTransform(scaleX: startScale, y: startScale)
             
-            let duration = UCPopoverBubble.ANIMATION_PRESENTATION_DURATION
-            UIView.uc_animate(withDuration: duration, timingFunc: UCEasing.easeOutBack, animations: {
-                self.view.uc_transform = CGAffineTransform.identity
-                self.view.uc_alpha = 1.0
+            let duration = FSPopoverBubble.ANIMATION_PRESENTATION_DURATION
+            UIView.fs_animate(withDuration: duration, timingFunc: FSEasing.easeOutBack, animations: {
+                self.view.fs_transform = CGAffineTransform.identity
+                self.view.fs_alpha = 1.0
             }, completion: {
                 self.didMove(toParentViewController: viewController)
             })
@@ -460,11 +460,11 @@ open class UCPopoverBubble: UIViewController {
         self.willMove(toParentViewController: nil)
         
         if animated {
-            let duration = UCPopoverBubble.ANIMATION_DISMISSAL_DURATION
-            let endScale = UCPopoverBubble.ANIMATION_END_SCALE
-            UIView.uc_animate(withDuration: duration, timingFunc: UCEasing.easeOutQuad, animations: {
-                self.view.uc_transform = CGAffineTransform(scaleX: endScale, y: endScale)
-                self.view.uc_alpha = 0.0
+            let duration = FSPopoverBubble.ANIMATION_DISMISSAL_DURATION
+            let endScale = FSPopoverBubble.ANIMATION_END_SCALE
+            UIView.fs_animate(withDuration: duration, timingFunc: FSEasing.easeOutQuad, animations: {
+                self.view.fs_transform = CGAffineTransform(scaleX: endScale, y: endScale)
+                self.view.fs_alpha = 0.0
             }, completion: {
                 self.view.removeFromSuperview()
                 self.removeFromParentViewController()
@@ -482,7 +482,7 @@ open class UCPopoverBubble: UIViewController {
 
 //# MARK: - Utilities
 
-fileprivate func UCGetVisibleViewController() -> UIViewController? {
+fileprivate func FSGetVisibleViewController() -> UIViewController? {
     var visibleVC: UIViewController?
     let keyWindow = UIApplication.shared.keyWindow
     if let rootVC = keyWindow?.rootViewController {
@@ -497,10 +497,10 @@ fileprivate func UCGetVisibleViewController() -> UIViewController? {
             }
         }
     } else {
-        assertionFailure("[UCPopoverBubble] No root view controller found on key window.")
+        assertionFailure("[FSPopoverBubble] No root view controller found on key window.")
     }
     
-    assert(visibleVC != nil, "[UCPopoverBubble] Could not determine visible view controller from current view controller hierarchy.")
+    assert(visibleVC != nil, "[FSPopoverBubble] Could not determine visible view controller from current view controller hierarchy.")
     return visibleVC
 }
 
@@ -508,13 +508,13 @@ fileprivate func UCGetVisibleViewController() -> UIViewController? {
 //# MARK: - Extensions
 
 fileprivate extension UILabel {
-    class func uc_defaultLabel(withText text: String) -> UILabel {
+    class func fs_defaultLabel(withText text: String) -> UILabel {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.text = text
-        label.textColor = UCPopoverBubble.DEFAULT_TEXT_COLOR
+        label.textColor = FSPopoverBubble.DEFAULT_TEXT_COLOR
         label.textAlignment = .center
         
         return label
@@ -522,12 +522,12 @@ fileprivate extension UILabel {
 }
 
 fileprivate extension UIButton {
-    class func uc_defaultButton(withTitle title: String) -> UIButton {
+    class func fs_defaultButton(withTitle title: String) -> UIButton {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle(title, for: .normal)
         button.setTitleColor(UIColor.white, for: .normal)
-        button.backgroundColor = UCPopoverBubble.DEFAULT_BUTTON_COLOR
+        button.backgroundColor = FSPopoverBubble.DEFAULT_BUTTON_COLOR
         
         return button
     }
@@ -538,18 +538,18 @@ fileprivate extension UIButton {
 
 fileprivate extension UIView {
 
-    var uc_alpha: CGFloat {
+    var fs_alpha: CGFloat {
         set {
             let baseValue = self.alpha
             let targetValue = newValue
             
-            if let latestState = ucAnimationStates.last {
+            if let latestState = fsAnimationStates.last {
                 let alphaUpdateBlock = latestState.propertyUpdateBlock(withTweenBlock: { t in
-                    let val = UCLerp(a: baseValue, t: t, b: targetValue)
+                    let val = FSLerp(a: baseValue, t: t, b: targetValue)
                     self.alpha = val
                 })
                 
-                __uc_addAnimationPropertyTimer(toState: latestState, withUpdateBlock: alphaUpdateBlock)
+                __fs_addAnimationPropertyTimer(toState: latestState, withUpdateBlock: alphaUpdateBlock)
             }
         }
         
@@ -558,23 +558,23 @@ fileprivate extension UIView {
         }
     }
     
-    var uc_transform: CGAffineTransform {
+    var fs_transform: CGAffineTransform {
         set {
             let baseValue = self.transform
             let targetValue = newValue
             
-            if let latestState = ucAnimationStates.last {
+            if let latestState = fsAnimationStates.last {
                 let transformUpdateBlock = latestState.propertyUpdateBlock(withTweenBlock: { t in
-                    let val = CGAffineTransform(a: UCLerp(a: baseValue.a, t: t, b: targetValue.a),
-                                                b: UCLerp(a: baseValue.b, t: t, b: targetValue.b),
-                                                c: UCLerp(a: baseValue.c, t: t, b: targetValue.c),
-                                                d: UCLerp(a: baseValue.d, t: t, b: targetValue.d),
-                                                tx: UCLerp(a: baseValue.tx, t: t, b: targetValue.tx),
-                                                ty: UCLerp(a: baseValue.ty, t: t, b: targetValue.ty))
+                    let val = CGAffineTransform(a: FSLerp(a: baseValue.a, t: t, b: targetValue.a),
+                                                b: FSLerp(a: baseValue.b, t: t, b: targetValue.b),
+                                                c: FSLerp(a: baseValue.c, t: t, b: targetValue.c),
+                                                d: FSLerp(a: baseValue.d, t: t, b: targetValue.d),
+                                                tx: FSLerp(a: baseValue.tx, t: t, b: targetValue.tx),
+                                                ty: FSLerp(a: baseValue.ty, t: t, b: targetValue.ty))
                     self.transform = val
                 })
                 
-                __uc_addAnimationPropertyTimer(toState: latestState, withUpdateBlock: transformUpdateBlock)
+                __fs_addAnimationPropertyTimer(toState: latestState, withUpdateBlock: transformUpdateBlock)
             }
         }
         
@@ -583,30 +583,30 @@ fileprivate extension UIView {
         }
     }
     
-    class func uc_animate(withDuration duration: TimeInterval, timingFunc:@escaping (CGFloat,CGFloat) -> TimeInterval, animations:() -> Void, completion:@escaping () -> Void) {
-        let state = UCAnimationState(withDuration: duration)
+    class func fs_animate(withDuration duration: TimeInterval, timingFunc:@escaping (CGFloat,CGFloat) -> TimeInterval, animations:() -> Void, completion:@escaping () -> Void) {
+        let state = FSAnimationState(withDuration: duration)
         state.timingFunc = timingFunc
         state.completionFunc = completion
         
-        ucAnimationStates.append(state)
+        fsAnimationStates.append(state)
         
         animations()
         
         state.launchQueuedAnimations()
     }
     
-    private func __uc_addAnimationPropertyTimer(toState state: UCAnimationState, withUpdateBlock updateBlock: (Timer) -> Void) {
-        let timer = Timer(timeInterval: ucAnimationFrameTime, target: self, selector: #selector(__uc_updateAnimationFrame(_:)), userInfo: updateBlock, repeats: true)
+    private func __fs_addAnimationPropertyTimer(toState state: FSAnimationState, withUpdateBlock updateBlock: (Timer) -> Void) {
+        let timer = Timer(timeInterval: fsAnimationFrameTime, target: self, selector: #selector(__fs_updateAnimationFrame(_:)), userInfo: updateBlock, repeats: true)
         state.timers.append(timer)
     }
     
-    @objc private func __uc_updateAnimationFrame(_ timer: Timer) {
+    @objc private func __fs_updateAnimationFrame(_ timer: Timer) {
         let updateBlock: (Timer) -> Void = timer.userInfo as! (Timer) -> Void
         updateBlock(timer)
     }
 }
 
-fileprivate class UCAnimationState {
+fileprivate class FSAnimationState {
     var timingFunc: ((CGFloat,CGFloat) -> TimeInterval)?
     var completionFunc: (() -> Void)?
     var timers: [Timer] = []
@@ -639,10 +639,10 @@ fileprivate class UCAnimationState {
                 timers.removeAll()
                 _timersCompleted = 0
                 
-                if let index = ucAnimationStates.index(where: { state -> Bool in
+                if let index = fsAnimationStates.index(where: { state -> Bool in
                     return state === self
                 }) {
-                    ucAnimationStates.remove(at: index)
+                    fsAnimationStates.remove(at: index)
                 }
             }
         }
@@ -665,10 +665,10 @@ fileprivate class UCAnimationState {
     
 }
 
-fileprivate var ucAnimationStates: [UCAnimationState] = []
-fileprivate let ucAnimationFrameTime = 1.0/60.0 // 60 fps
+fileprivate var fsAnimationStates: [FSAnimationState] = []
+fileprivate let fsAnimationFrameTime = 1.0/60.0 // 60 fps
 
-fileprivate func UCLerp(a: CGFloat, t: TimeInterval, b: CGFloat) -> CGFloat {
+fileprivate func FSLerp(a: CGFloat, t: TimeInterval, b: CGFloat) -> CGFloat {
     let t = CGFloat(t)
     return (a * (1.0 - t) + b * t)
 }
@@ -676,7 +676,7 @@ fileprivate func UCLerp(a: CGFloat, t: TimeInterval, b: CGFloat) -> CGFloat {
 
 //# MARK: - Easing functions
 
-fileprivate class UCEasing {
+fileprivate class FSEasing {
     
     static let easeOutBack: (CGFloat,CGFloat) -> TimeInterval = { t, d in
         let s = 1.90158
